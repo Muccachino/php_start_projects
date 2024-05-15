@@ -18,29 +18,28 @@ abstract class Animal
     return $this->name;
   }
 
-  public function getWeight(): float
-  {
-    return $this->weight;
-  }
-
-  public function setWeight(float $newWeight): void
-  {
-    $this->weight = $newWeight;
-  }
-
   public function getMinWeight(): float
   {
     return $this->minWeight;
   }
 
-  public function getMaxWeight(): float
+  public function getSex(): string
   {
-    return $this->maxWeight;
+    return $this->isFemale ? 'female' : 'male';
   }
 
-  public function getIsFemale(): bool
+  abstract public function pet(): void;
+
+  public function feed(): void
   {
-    return $this->isFemale;
+    if (($this->getWeight() + $this->getFoodPortion()) <= $this->getMaxWeight()) {
+      $this->setWeight(($this->getWeight() + $this->getFoodPortion()));
+    }
+  }
+
+  public function getWeight(): float
+  {
+    return $this->weight;
   }
 
   public function getFoodPortion(): float
@@ -48,10 +47,13 @@ abstract class Animal
     return $this->foodPortion;
   }
 
-  abstract public function pet(): void;
-
-  public function feed(): void
+  public function getMaxWeight(): float
   {
-    $this->weight += $this->foodPortion;
+    return $this->maxWeight;
+  }
+
+  public function setWeight(float $newWeight): void
+  {
+    $this->weight = $newWeight;
   }
 }

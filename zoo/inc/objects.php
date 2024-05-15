@@ -22,7 +22,9 @@ $theZoo->addAnimal($namibi);
 $theZoo->addAnimal($henrik);
 $theZoo->addAnimal($amilia);
 
-$currentlyfed = 0;
-while ($currentlyfed != count($theZoo->getAnimals())) {
 
+foreach ($theZoo->getAnimals() as $animal) {
+  while ($animal->getWeight() < $animal->getMinWeight()) {
+    $animal->feed();
+  }
 }
