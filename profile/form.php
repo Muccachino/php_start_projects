@@ -7,7 +7,7 @@ $chosenSex = $_POST["sex"] ?? "";
 $sexes = ["male", "female", "diverse"];
 
 $max_file_size = 1024 * 1024 * 4;
-$upload_dir = __DIR__ . "/uploads/";
+//$upload_dir = __DIR__ . "/uploads/";
 $allowed_types = ["image/jpeg", "image/png"];
 $allowed_extensions = ["jpeg", "jpg", "png"];
 

@@ -4,7 +4,7 @@ function e($string): string
   return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
 
-function scale_and_copy(string $filename, string $save_to, $max_width = 300, $max_height = 300): bool
+/*function scale_and_copy(string $filename, string $save_to, $max_width = 300, $max_height = 300): bool
 {
   $width = $max_width;
   $height = $max_height;
@@ -42,4 +42,4 @@ function scale_and_copy(string $filename, string $save_to, $max_width = 300, $ma
   imagedestroy($source);
 
   return true;
-}
+}*/
