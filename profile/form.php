@@ -3,10 +3,11 @@ include "functions.php";
 include "header.php";
 
 $showForm = true;
-$chosenSex = "";
+$chosenSex = $_POST["sex"] ?? "";
 $sexes = ["male", "female", "diverse"];
 
 $max_file_size = 1024 * 1024 * 4;
+$upload_dir = __DIR__ . "/uploads/";
 $allowed_types = ["image/jpeg", "image/png"];
 $allowed_extensions = ["jpeg", "jpg", "png"];
 
@@ -52,6 +53,19 @@ $filter = [
   "city" => "",
 ];
 
+/*function get_file_path(string $filename, string $path): string
+{
+  $basename = pathinfo($filename, PATHINFO_FILENAME);
+  $extension = pathinfo($filename, PATHINFO_EXTENSION);
+  $basename = preg_replace("/[^A-z0-9]/", "-", $basename);
+  $i = 0;
+  while (file_exists($path . $filename)) {
+    $i++;
+    $filename = $basename . $i . "." . $extension;
+  }
+  return __DIR__ . "/uploads/" . $filename;
+}*/
+
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
   // Auslesen des Bildes
@@ -91,6 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
   }
   if ($noErrors) {
+    /*    $filename = $image["name"];
+        $destination = get_file_path($filename, $upload_dir);
+        $moved = scale_and_copy($image["tmp_name"], $destination);*/
     $showForm = false;
   }
 }
@@ -168,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
           $imageData = file_get_contents($_FILES['image']['tmp_name']);
           echo sprintf('<img src="data:image/png;base64,%s" width="400" height="600"/>', base64_encode($imageData));
           ?>
+            <!--<img src="<?php /*= __DIR__ . "/uploads/" . $_FILES["image"]["name"] */ ?>" alt="profile-pic">-->
         </div>
         <div style="width: 30vw">
             <h3>Persönliche Daten</h3>
