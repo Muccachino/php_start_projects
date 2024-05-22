@@ -181,11 +181,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <?php if (!$showForm) : ?>
     <main style="display: flex">
         <div style="margin-right: 100px">
-          <?php
-          $imageData = file_get_contents($_FILES['image']['tmp_name']);
-          echo sprintf('<img src="data:image/png;base64,%s" width="400" height="600"/>', base64_encode($imageData));
+          <?php if ($_FILES["image"]) {
+            $imageData = file_get_contents($_FILES['image']['tmp_name']);
+            echo sprintf('<img src="data:image/png;base64,%s" width="400" height="600"/>', base64_encode($imageData));
+          } else {
+            echo "<p>Kein Bild hinzugefügt</p>";
+          }
           ?>
-            <!--<img src="<?php /*= __DIR__ . "/uploads/" . $_FILES["image"]["name"] */ ?>" alt="profile-pic">-->
         </div>
         <div style="width: 30vw">
             <h3>Persönliche Daten</h3>
