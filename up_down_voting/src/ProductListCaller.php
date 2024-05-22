@@ -11,7 +11,7 @@ class ProductListCaller
 
   public function fetchALl(): array
   {
-    $stmt = $this->pdo->prepare("SELECT * FROM products ORDER BY id");
+    $stmt = $this->pdo->prepare("SELECT * FROM products ORDER BY upvotes - downvotes DESC");
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_CLASS, Product::class);
   }
@@ -60,8 +60,20 @@ class ProductListCaller
 
   public function editProductTitle(string $id, string $title): void
   {
-    $stmt = $this->pdo->prepare("UPDATE images SET title = :title WHERE id = :id");
+    $stmt = $this->pdo->prepare("UPDATE products SET title = :title WHERE id = :id");
 
     $stmt->execute(["title" => $title, "id" => $id]);
+  }
+
+  public function addUpvote(string $id): void
+  {
+    $stmt = $this->pdo->prepare("UPDATE products SET upvotes = upvotes + 1 WHERE id = :id");
+    $stmt->execute(["id" => $id]);
+  }
+
+  public function addDownvote(string $id): void
+  {
+    $stmt = $this->pdo->prepare("UPDATE products SET downvotes = downvotes + 1 WHERE id = :id");
+    $stmt->execute(["id" => $id]);
   }
 }

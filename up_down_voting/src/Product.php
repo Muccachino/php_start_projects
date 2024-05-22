@@ -23,13 +23,13 @@ class Product
     return $this->downvotes;
   }
 
-  public function addToUpvotes(): void
-  {
-    $this->upvotes++;
-  }
+  /*  public function addToUpvotes(): void
+    {
+      $this->upvotes++;
+    }
 
-  public function addToDownvotes(): void
-  {
-    $this->downvotes++;
-  }
+    public function addToDownvotes(): void
+    {
+      $this->downvotes++;
+    }*/
 }

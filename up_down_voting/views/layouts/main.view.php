@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="css/pico.css">
     <link rel="stylesheet" href="css/pico.classless.min.css">
-    <title>Template</title>
+    <title>Up-Down-Voting</title>
 </head>
 <body>
 <header>
@@ -21,7 +21,7 @@
         </ul>
     </nav>
 </header>
-<main class="grid">
+<main class="grid" style="padding: 0">
   <?= $content ?? "" ?>
 </main>
 <footer>
