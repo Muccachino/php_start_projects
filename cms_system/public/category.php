@@ -1,39 +1,33 @@
 <?php
-require_once "includes/db-connect.php";
-require_once "includes/functions.php";
+require "../src/bootstrap.php";
 
-// SQL-Statement für die 6 neuesten Artikel
-$sql = "SELECT a.id, a.title, a.summary, a.category_id, a.user_id, c.name AS category,
-CONCAT(u.forename, ' ', u.surname) AS author,
-i.filename AS image_file,
-i.alttext AS image_alt
-FROM articles AS a 
-JOIN category AS c ON a.category_id = c.id 
-JOIN user AS u ON a.user_id = u.id
-LEFT JOIN images AS i ON a.images_id = i.id
-WHERE a.published = 1
-ORDER BY a.id DESC 
-LIMIT 6;";
-
-if (isset($pdo)) {
-  $articles = pdo_execute($pdo, $sql)->fetchAll(PDO::FETCH_ASSOC);
+$cat_id = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
+if (!$cat_id) {
+  include APP_ROOT . "/public/page_not_found.php";
 }
 
-// SQL-Abfrage um alle Kategorien zu erhalten
-$sql = "SELECT id, name FROM category WHERE navigation = 1";
+if (isset($cms)) {
+  $category = $cms->getCategory()->fetch($cat_id);
+  if (!$category) {
+    include APP_ROOT . "/public/page_not_found.php";
+  }
 
-// Führe die SQL-Anweisung aus und speichere das Ergebnis in der Variable $navigation.
-if (isset($pdo)) {
-  $navigation = pdo_execute($pdo, $sql)->fetchAll();
+  $articles = $cms->getArticle()->getAll($cat_id);
+  $navigation = $cms->getCategory()->fetchNavigation();
+  $title = $category["name"];
+  $description = $category["description"];
+  $section = $cat_id;
 }
 
-// Header Variablen setzen
-$title = "IT-News";
-$description = "All about IT and News from Software Development and Hardware";
-$section = 1;
+
 ?>
 
 <?php include "includes/header.php"; ?>
+
+<aside class="flex justify-center items-center flex-col p-8">
+    <h1 class="text-4xl text-blue-500 mb-8"><?= e($category["name"]) ?></h1>
+    <p class="text-gray-500"><?= e($category["description"]) ?></p>
+</aside>
 
 <main class="flex flex-wrap p-8" id="content">
   <?php foreach ($articles as $article): ?>
@@ -57,5 +51,3 @@ $section = 1;
 </main>
 
 <?php include "includes/footer.php"; ?>
-
-
