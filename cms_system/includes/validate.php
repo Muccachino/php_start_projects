@@ -12,6 +12,7 @@ function isText($text, $min = 1, $max = 100): bool
 
 function is_user_id($id, $users): bool
 {
+
   foreach ($users as $user) {
     if ($user["id"] == $id) {
       return true;
@@ -22,6 +23,7 @@ function is_user_id($id, $users): bool
 
 function is_category($id, $categories): bool
 {
+
   foreach ($categories as $category) {
     if ($category["id"] == $id) {
       return true;

@@ -33,7 +33,7 @@ $success = filter_input(INPUT_GET, "success") ?? "";
       <?php endif; ?>
 
         <h1 class="text-4xl text-blue-500 mb-8">Articles</h1>
-        <button class="text-white bg-blue-500 p-3 rounded-md hover:bg-pink-600"><a href="category.php">Add a new
+        <button class="text-white bg-blue-500 p-3 rounded-md hover:bg-pink-600"><a href="article.php">Add a new
                 Article</a></button>
     </header>
 

@@ -63,6 +63,7 @@ if (isset($pdo)) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
   // Bild auslesen
   if (isset($_FILES["image_file"])) {
     $image = $_FILES["image_file"];
@@ -101,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $article["user_id"] = filter_input(INPUT_POST, "user_id", FILTER_VALIDATE_INT);
   $article["category_id"] = filter_input(INPUT_POST, "category_id", FILTER_VALIDATE_INT);
   $article["published"] = filter_input(INPUT_POST, "published", FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+
 
   // Error-Meldung erstellen und zusätzliche Validierung
   $errors["title"] = isText($article["title"]) ? "" : "Title must be between 1 and 100 characters";
@@ -181,7 +183,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <div>
             <label class="block mb-2 text-sm font-medium text-gray-900 pt-2" for="category">Category</label>
-            <select id="category" name="category"
+            <select id="category_id" name="category_id"
                     class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                 <option>select category</option>
               <?php foreach ($categories as $category): ?>
@@ -190,7 +192,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </select>
             <span class="text-red-500"><?= $errors['category'] ?></span>
             <label class="block mb-2 text-sm font-medium text-gray-900 pt-2" for="user_id">User</label>
-            <select id="user_id" name="user"
+            <select id="user_id" name="user_id"
                     class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                 <option>select user</option>
               <?php foreach ($users as $user): ?>

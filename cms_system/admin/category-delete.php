@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $sql = "DELETE FROM category WHERE id = :id";
 
   try {
-    pdo_execute($pdo, $sql, ['id' => $id]);
+    pdo_execute($pdo, $sql, ['id' => $cat_id]);
     redirect("categories.php", ["success" => "category successfully deleted"]);
   } catch (PDOException $e) {
     $error = $e->errorInfo[1];
