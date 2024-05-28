@@ -54,7 +54,7 @@ function get_file_path(string $filename, string $path, bool $admin = false): str
     $filename = $basename . $i . "." . $extension;
   }
   if ($admin) {
-    return dirname(__DIR__, 1) . "/uploads/" . $filename;
+    return dirname(__DIR__, 1) . "/public/uploads/" . $filename;
   }
   return __DIR__ . "/uploads/" . $filename;
 }

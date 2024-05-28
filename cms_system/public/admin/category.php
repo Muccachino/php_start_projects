@@ -38,6 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $category["description"] = filter_input(INPUT_POST, "description");
   $category["navigation"] = filter_input(INPUT_POST, "navigation", FILTER_VALIDATE_BOOLEAN);
 
+  if (!$category["navigation"]) {
+    $category["navigation"] = false;
+  }
+
   // Die Daten werden auf Länge und Vorhandensein validiert
   $errors["name"] = Validate::isText($category["name"], 1, 50) && (!empty($category["name"])) ? "" : "Name must be between 1 and 50 characters long";
   $errors["description"] = Validate::isText($category["description"], 1, 254) && (!empty($category["description"])) ? "" : "Description must be between 1 and 254 characters long";

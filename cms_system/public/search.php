@@ -7,47 +7,26 @@ $offset = filter_input(INPUT_GET, "offset", FILTER_VALIDATE_INT) ?? 0;
 $articles = [];
 $count = 0;
 
-$sql = "SELECT id, name FROM category WHERE navigation = 1";
-if (isset($pdo)) {
-  $navigation = pdo_execute($pdo, $sql)->fetchAll(PDO::FETCH_ASSOC);
-}
+if (isset($cms)) {
+  $navigation = $cms->getCategory()->fetchNavigation();
 
-$section = "";
-$title = "Search Results for " . $search_term;
-$description = "Search results for " . $search_term . " the IT-News-Blog";
+  $section = "";
+  $title = "Search Results for " . $search_term;
+  $description = "Search results for " . $search_term . " the IT-News-Blog";
 
-if (!empty($search_term)) {
-  $sql = "SELECT COUNT(*) FROM articles
-WHERE published = 1 AND (title LIKE :search OR summary = :search OR content LIKE :search)";
-  $count = pdo_execute($pdo, $sql, ["search" => "%$search_term%"])->fetchColumn();
+  if (!empty($search_term)) {
+    $count = $cms->getArticle()->getArticleCount($search_term);
 
-  if ($count > 0) {
-    $sql = "SELECT a.id, a.title, a.summary, a.category_id, a.user_id, c.name AS category,
-            CONCAT(u.forename, ' ', u.surname) AS author,
-            i.filename AS image_file,
-            i.alttext AS image_alt
-            FROM articles AS a 
-            JOIN category AS c ON a.category_id = c.id 
-            JOIN user AS u ON a.user_id = u.id
-            LEFT JOIN images AS i ON a.images_id = i.id
-            WHERE a.published = 1 AND (a.title LIKE :search OR a.summary LIKE :search OR a.content LIKE :search)
-            ORDER BY a.id DESC 
-            LIMIT :per_page
-            OFFSET :offset";
+    if ($count > 0) {
+      $articles = $cms->getArticle()->getSearchedArticles($search_term, $per_page, $offset);
+    }
+  }
 
-    $articles = pdo_execute($pdo, $sql, [
-      "search" => "%$search_term%",
-      "per_page" => (int)$per_page,
-      "offset" => (int)$offset
-    ])->fetchAll(PDO::FETCH_ASSOC);
+  if ($count > $per_page) {
+    $total_pages = ceil($count / $per_page);
+    $current_page = ceil($offset / $per_page) + 1;
   }
 }
-
-if ($count > $per_page) {
-  $total_pages = ceil($count / $per_page);
-  $current_page = ceil($offset / $per_page) + 1;
-}
-
 ?>
 
 <?php include "includes/header.php"; ?>

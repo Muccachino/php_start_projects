@@ -34,7 +34,7 @@ class User
 
   public function getAll(): array
   {
-    $sql = "SELECT forename, surname, joined, profile_pic FROM user";
+    $sql = "SELECT id, forename, surname, joined, profile_pic FROM user";
 
     return $this->db->sql_execute($sql)->fetchAll();
   }

@@ -1,7 +1,5 @@
 <?php
-require "../includes/functions.php";
-require "../includes/db-connect.php";
-require "../includes/validate.php";
+require "../../src/bootstrap.php";
 
 // Variablen initialisieren für Bildupload
 
@@ -40,22 +38,11 @@ $errors = [
 
 // Lade alle Kategorien von der Datenbank
 
-if (isset($pdo)) {
-  $sql = "SELECT id, name FROM category";
-  $categories = pdo_execute($pdo, $sql)->fetchAll(PDO::FETCH_ASSOC);
-
-  $sql = "SELECT id, forename, surname FROM user";
-  $users = pdo_execute($pdo, $sql)->fetchAll(PDO::FETCH_ASSOC);
-
-
+if (isset($cms)) {
+  $categories = $cms->getCategory()->getAll();
+  $users = $cms->getUser()->getAll();
   if ($id) {
-    $sql = "SELECT a.id, a.title, a.summary, a.content, a.category_id, a.user_id, a.images_id, a.published,
-            i.filename as image_file, i.alttext as image_alt
-            FROM articles a
-            LEFT JOIN images i ON a.images_id=i.id
-            WHERE a.id=:id;";
-
-    $article = pdo_execute($pdo, $sql, ["id" => $id])->fetch(PDO::FETCH_ASSOC);
+    $article = $cms->getArticle()->fetch($id, false);
     if (!$article) {
       redirect("articles.php", ["error" => "article not found"]);
     }
@@ -76,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       // Alt-Text wird gesetzt
       $article["image_alt"] = filter_input(INPUT_POST, "image_alt");
       // Alt-Text validieren
-      $errors["image_alt"] = isText($article["image_alt"], 1, 254) ? "" : "Alt text must be between 1 and 254 characters";
+      $errors["image_alt"] = Validate::isText($article["image_alt"], 1, 254) ? "" : "Alt text must be between 1 and 254 characters";
 
       // Bildtyp wird validiert
       $typ = mime_content_type($tmp_path);
@@ -90,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       // Wenn es keine Fehler gibt, wird ein Speicherort für das Bild festgelegt
       if ($errors["image_file"] === "" && $errors["image_alt"] === "") {
         $article["image_file"] = $image["name"];
-        $save_to = get_file_path($image["name"], $path_to_img);
+        $save_to = get_file_path($image["name"], $path_to_img, true);
       }
     }
   }
@@ -105,11 +92,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
   // Error-Meldung erstellen und zusätzliche Validierung
-  $errors["title"] = isText($article["title"]) ? "" : "Title must be between 1 and 100 characters";
-  $errors["summary"] = isText($article["summary"], 1, 200) ? "" : "Summary must be between 1 and 200 characters";
-  $errors["content"] = isText($article["content"], 1, 10000) ? "" : "Content must be between 1 and 10000 characters";
-  $errors["user"] = is_user_id($article["user_id"], $users) ? "" : "User not found";
-  $errors["category"] = is_category($article["category_id"], $categories) ? "" : "Category not found";
+  $errors["title"] = Validate::isText($article["title"]) ? "" : "Title must be between 1 and 100 characters";
+  $errors["summary"] = Validate::isText($article["summary"], 1, 200) ? "" : "Summary must be between 1 and 200 characters";
+  $errors["content"] = Validate::isText($article["content"], 1, 10000) ? "" : "Content must be between 1 and 10000 characters";
+  $errors["user"] = Validate::is_user_id($article["user_id"], $users) ? "" : "User not found";
+  $errors["category"] = Validate::is_category($article["category_id"], $categories) ? "" : "Category not found";
 
   $problems = implode($errors);
 
@@ -117,41 +104,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // bindings beinhaltet alle Variablen die der Funktion Statement::bindvalue übergeben werden (oder auch Statement::execute als Array)
     $bindings = $article;
     try {
-      // Transaktionen starten
-      $pdo->beginTransaction();
 
       // Wenn ein Bild hochgeladen wurde, wird es gespeichert
       if ($save_to) {
         scale_and_copy($tmp_path, $save_to);
 
-        $sql = "INSERT INTO images (filename, alttext) VALUES (:filename, :alttext)";
-        $stmt = pdo_execute($pdo, $sql, ["filename" => $article["image_file"], "alttext" => $article["image_alt"]]);
+        $stmt = $cms->getImage()->push($article["image_file"], $article["image_alt"]);
         // lastInsertId gibt die ID des zuletzt eingefügten Datensatzes zurück
-        $bindings["images_id"] = $pdo->lastInsertId();
+        $bindings["images_id"] = $cms->getImage()->getLatestImageId()["LAST_INSERT_ID()"];
       }
 
       // Da ab hier die Bildtabelle aktualisiert wurde, werden die Bilddaten aus dem bindings Array entfernt.
       // Für das INSERT (Anlegen eines neuen Datensatzes) wird die ID automatisch mit autoinkrement erstellt
       // und muss deshalb hier aus den bindings entfernt werden.
-      unset($bindings["image_file"], $bindings["image_alt"], $bindings["id"]);
-      $sql = "INSERT INTO articles (title, summary, content, category_id, user_id, images_id, published)
-                VALUES (:title, :summary, :content, :category_id, :user_id, :images_id, :published)";
+      unset($bindings["image_file"], $bindings["image_alt"]);
 
       // Code, wenn ein Artikel bearbeitet wurde
       if ($id) {
         // Wenn die ID vorhanden ist, wird ein UPDATE durchgeführt und die ID wird wieder in das bindings Array aufgenommen.
-        $bindings["id"] = $id;
-        $sql = "UPDATE articles SET title = :title, summary = :summary, content = :content, category_id = :category_id,
-                    user_id = :user_id, images_id = :images_id, published = :published WHERE id = :id";
-      }
-      $stmt = pdo_execute($pdo, $sql, $bindings);
+        unset($bindings["author"], $bindings["created"], $bindings["category"], $bindings["image_id"]);
+        $cms->getArticle()->update($bindings);
 
-      // Transaktion abschließen
-      $pdo->commit();
-      redirect("articles.php", ["success" => "article successfully saved"]);
+      } else {
+        // Code, wenn ein neuer Artikel erstellt wird
+        unset($bindings["id"]);
+        $cms->getArticle()->push($bindings);
+      }
+
+      redirect("articles.php", ["success" => "Article successfully saved"]);
     } catch (PDOException $e) {
-      // Wenn ein Fehler auftritt, wird die Transaktion zurückgerollt und der Fehler ausgegeben.
-      $pdo->rollBack();
+
       $errors["issue"] = $e->getMessage();
     }
   }

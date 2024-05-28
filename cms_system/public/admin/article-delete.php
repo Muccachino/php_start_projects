@@ -1,14 +1,10 @@
 <?php
-require "../includes/functions.php";
-require "../includes/db-connect.php";
+require "../../src/bootstrap.php";
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?? null;
-$sql = "SELECT a.title, a.images_id, i.filename, i.id AS imageId
-        FROM articles AS a
-        LEFT JOIN images AS i ON a.images_id = i.id
-        WHERE a.id = :id";
-if (isset($pdo)) {
-  $article = pdo_execute($pdo, $sql, ['id' => $id])->fetch();
+
+if (isset($cms)) {
+  $article = $cms->getArticle()->fetch($id);
 }
 
 
@@ -16,28 +12,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $art_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT) ?? null;
 
   try {
-    $pdo->beginTransaction();
+    // Wenn ein Bild vorhanden ist, muss zunächst die Bild ID auf null gesetzt werden um es löschen zu können.
+    if ($article["image_id"]) {
+      // Prüfen, ob das Bild noch für andere Artikel verwendet wird
+      $imageUsed = $cms->getArticle()->imageInUse($article["image_id"]);
 
-    if ($article["images_id"]) {
-      $image_path = get_file_path($article["filename"], "", true);
-      $sql = "UPDATE articles SET images_id = NULL WHERE id = :id";
-      $stmt = pdo_execute($pdo, $sql, ['id' => $art_id]);
-      unlink($image_path);
+      $image_path = get_file_path($article["image_file"], "", true);
+
+      $stmt = $cms->getArticle()->setImageIdNull($art_id);
+
+      // Wenn das Bild nicht öfter verwendet wird, kann es gelöscht werden.
+      if (!$imageUsed) {
+        // Löschen des Bildes aus dem Serverordner
+        unlink($image_path);
+
+        // Löschen des Bildes aus der Datenbank
+        $cms->getImage()->deleteArticleImage($article["image_id"]);
+      }
     }
 
-    $sql = "DELETE FROM images WHERE id = :id";
-    pdo_execute($pdo, $sql, ["id" => $article["imageId"]]);
+    // Löschen des Artikels aus der Datenbank
+    $cms->getArticle()->delete($art_id);
 
-    $sql = "DELETE FROM articles WHERE id = :id";
-    pdo_execute($pdo, $sql, ["id" => $art_id]);
-
-    $pdo->commit();
     redirect("articles.php", ["success" => "Article successfully deleted"]);
 
   } catch (PDOException $e) {
-    $pdo->rollBack();
     redirect("articles.php", ["error" => "Article could not be removed"]);
-
   }
 
 }

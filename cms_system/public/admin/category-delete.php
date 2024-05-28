@@ -1,19 +1,17 @@
 <?php
-require "../includes/functions.php";
-require "../includes/db-connect.php";
+require "../../src/bootstrap.php";
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?? null;
-$sql = "SELECT name FROM category WHERE id = :id";
-if (isset($pdo)) {
-  $category = pdo_execute($pdo, $sql, ['id' => $id])->fetch();
+
+if (isset($cms)) {
+  $category = $cms->getCategory()->fetch($id);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $cat_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT) ?? null;
-  $sql = "DELETE FROM category WHERE id = :id";
 
   try {
-    pdo_execute($pdo, $sql, ['id' => $cat_id]);
+    $cms->getCategory()->delete($cat_id);
     redirect("categories.php", ["success" => "category successfully deleted"]);
   } catch (PDOException $e) {
     $error = $e->errorInfo[1];
