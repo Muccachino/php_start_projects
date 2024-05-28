@@ -6,6 +6,8 @@
     <title><?= e($title ?? '') ?> Admin Area</title>
     <meta name="description" content="<?= e($description ?? '') ?>">
     <link rel="stylesheet" type="text/css" href="../css/output.css">
+    <script src="https://cdn.tiny.cloud/1/ifgutrgmovn393kg2ys4xkwq1vk7bpqk2hm9096eh2x5ao3i/tinymce/7/tinymce.min.js"
+            referrerpolicy="origin"></script>
 </head>
 <body>
 <header class="bg-white border-gray-200 dark:bg-gray-900 border-b-4">

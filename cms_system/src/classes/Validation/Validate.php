@@ -1,5 +1,7 @@
 <?php
 
+namespace EdvGraz\Validation;
+
 class Validate
 {
   public static function isNumber($number, $min = 0, $max = 100): bool
